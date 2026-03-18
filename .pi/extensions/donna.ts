@@ -347,6 +347,8 @@ export default function (pi: ExtensionAPI) {
 			"Use donna to remember useful discoveries (file paths, patterns, commands)",
 			"Before searching for something, recall from donna first",
 			"Store user preferences when they say 'always', 'prefer', or 'never'",
+			"Store stable facts about Donna's own voice or working style with scope=self",
+			"Store project and task context with scope=shared",
 			"Keep values short — one sentence max",
 		],
 		parameters: DonnaParams,

@@ -116,6 +116,7 @@ describe("soul prompt loading", () => {
     expect(codexPrompt).toContain("Donna stores memory in nuggets.");
     expect(codexPrompt).toContain("donna remember <nugget>");
     expect(piPrompt).toContain("A nugget is a small memory unit");
+    expect(piPrompt).toContain("Use `user` memory for stable facts about the user");
 
     rmSync(soulDir, { recursive: true, force: true });
   });
