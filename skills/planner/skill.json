@@ -1,0 +1,28 @@
+{
+  "name": "planner",
+  "description": "Break larger requests into phased implementation steps, risks, and checkpoints without getting stuck in analysis.",
+  "scope": "sticky",
+  "triggers": [
+    "plan",
+    "roadmap",
+    "break this down",
+    "implementation plan",
+    "phases"
+  ],
+  "requires": [
+    "files"
+  ],
+  "adapters": {
+    "pi": {
+      "enabled": true,
+      "extraPrompt": "Keep plans concrete and momentum-oriented."
+    },
+    "codex": {
+      "enabled": true,
+      "extraPrompt": "Prefer short phases with visible checkpoints instead of abstract brainstorming."
+    },
+    "local": {
+      "enabled": true
+    }
+  }
+}

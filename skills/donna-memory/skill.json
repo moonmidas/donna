@@ -1,0 +1,30 @@
+{
+  "name": "donna-memory",
+  "description": "Recall Donna memory before expensive repo searches and save durable discoveries after you learn something useful.",
+  "scope": "sticky",
+  "triggers": [
+    "remember",
+    "memory",
+    "recall",
+    "what did we learn",
+    "what do you know"
+  ],
+  "requires": [
+    "memory",
+    "files"
+  ],
+  "adapters": {
+    "pi": {
+      "enabled": true,
+      "extraPrompt": "Prefer the Donna memory tools before broad repo searches."
+    },
+    "codex": {
+      "enabled": true,
+      "extraPrompt": "Start with `donna recall` before broader repo exploration."
+    },
+    "local": {
+      "enabled": true,
+      "extraPrompt": "Be explicit that this backend cannot run shell commands if memory actions are requested directly."
+    }
+  }
+}

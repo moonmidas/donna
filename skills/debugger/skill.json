@@ -1,0 +1,30 @@
+{
+  "name": "debugger",
+  "description": "Debug failures methodically by reproducing the problem, narrowing the cause, and validating the fix.",
+  "scope": "sticky",
+  "triggers": [
+    "debug",
+    "failing test",
+    "error",
+    "broken",
+    "why is this happening"
+  ],
+  "requires": [
+    "files",
+    "shell"
+  ],
+  "adapters": {
+    "pi": {
+      "enabled": true,
+      "extraPrompt": "Reproduce the issue before suggesting broad fixes."
+    },
+    "codex": {
+      "enabled": true,
+      "extraPrompt": "Prefer narrowing evidence over speculative patching."
+    },
+    "local": {
+      "enabled": true,
+      "extraPrompt": "Be clear when you are reasoning without runtime access."
+    }
+  }
+}

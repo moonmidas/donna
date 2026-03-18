@@ -1,0 +1,28 @@
+{
+  "name": "researcher",
+  "description": "Gather the minimum codebase context needed to answer a question or make a safe change, then distill it clearly.",
+  "scope": "one-shot",
+  "triggers": [
+    "research",
+    "investigate",
+    "look into",
+    "how does this work",
+    "where is"
+  ],
+  "requires": [
+    "files"
+  ],
+  "adapters": {
+    "pi": {
+      "enabled": true
+    },
+    "codex": {
+      "enabled": true,
+      "extraPrompt": "Prefer primary code references over guesswork."
+    },
+    "local": {
+      "enabled": true,
+      "extraPrompt": "If you do not have repository access, keep conclusions tentative."
+    }
+  }
+}

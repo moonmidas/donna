@@ -1,0 +1,29 @@
+{
+  "name": "reviewer",
+  "description": "Review code for bugs, regressions, and testing gaps before summarizing anything else.",
+  "scope": "one-shot",
+  "triggers": [
+    "review",
+    "code review",
+    "audit this change",
+    "regression",
+    "look for bugs"
+  ],
+  "requires": [
+    "files"
+  ],
+  "adapters": {
+    "pi": {
+      "enabled": true,
+      "extraPrompt": "Lead with findings, not a broad summary."
+    },
+    "codex": {
+      "enabled": true,
+      "extraPrompt": "Present findings ordered by severity with file references when possible."
+    },
+    "local": {
+      "enabled": true,
+      "extraPrompt": "If you cannot inspect code directly, say so and keep the review scoped to the provided context."
+    }
+  }
+}

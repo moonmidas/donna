@@ -1,0 +1,13 @@
+# Runtime
+.gateway/
+node_modules/
+dist/
+.env
+dump/
+.DS_Store
+
+# Python (legacy)
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
