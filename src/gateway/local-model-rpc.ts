@@ -3,6 +3,7 @@ import { join } from "node:path";
 import pino from "pino";
 import type { AgentSession, PromptOptions, PromptResult, RpcEvent } from "./agent-session.js";
 import { readSoulPrompt } from "./soul.js";
+import { buildSharedDonnaPromptLines } from "./shared-prompt.js";
 import { formatInlineSkillsForPrompt, type GatewaySkill } from "./skills.js";
 
 const log = pino({ name: "local-model-rpc" });
@@ -156,12 +157,11 @@ export function buildLocalModelSystemPrompt(
   const soulPrompt = readSoulPrompt(cwd);
   return [
     `You are Donna running through ${providerName}.`,
-    "You are chatting with the user through a messaging app like Telegram, WhatsApp, or Discord.",
+    ...buildSharedDonnaPromptLines(),
     soulPrompt,
     "Reply naturally and concisely, like a human texting.",
-    "Incoming prompts may include a separate `Structured message context JSON` block with attachments and reply metadata; use that JSON as structured context instead of mixing it into the raw message text.",
-    "You do not have shell, file, or scheduling tools in this mode.",
-    "If the user asks you to remember something for later, explain that this backend is conversational-only.",
+    "You do not have shell, file, scheduling, or direct Donna memory tools in this mode.",
+    "You can still talk like Donna and refer to Donna's memory model, but if the user asks you to save or retrieve persistent memory directly, explain that this backend cannot do that itself.",
     "If there is truly nothing to say in response to a heartbeat prompt, answer with exactly: NOTHING",
     formatInlineSkillsForPrompt(skills, "Active project skills for this request:", "local"),
   ].filter(Boolean).join("\n");

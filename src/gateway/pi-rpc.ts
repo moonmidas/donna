@@ -6,6 +6,7 @@ import { join } from "node:path";
 import pino from "pino";
 import type { AgentSession, PromptOptions, PromptResult, RpcEvent } from "./agent-session.js";
 import { readSoulPrompt } from "./soul.js";
+import { buildSharedDonnaPromptLines } from "./shared-prompt.js";
 import { formatActiveSkillsNotice, type GatewaySkill } from "./skills.js";
 
 const log = pino({ name: "pi-rpc" });
@@ -507,13 +508,12 @@ export class PiRpc extends EventEmitter implements AgentSession {
 export function buildPiAppendSystemPrompt(cwd = process.cwd()): string {
   const soulPrompt = readSoulPrompt(cwd);
   return [
-    "You are running as a chat bot inside a messaging app such as Telegram, WhatsApp, or Discord.",
+    ...buildSharedDonnaPromptLines(),
     "You have access to the user's local machine.",
-    "Incoming prompts may include a separate `Structured message context JSON` block with attachments and reply metadata; use that JSON as structured context and treat any attachment `path` values as real local files.",
     "Do NOT use local notifications, desktop alerts, or OS-level reminders — the user will never see them.",
     "For reminders and scheduled messages, use the `schedule` tool which delivers messages through the active chat channel.",
     "If the user explicitly asks you to send a local file and the chat platform supports attachments, include one line per file exactly like `[[attachment:/absolute/path/to/file]]`.",
-    "Donna uses nuggets for memory. A nugget is a small memory unit you can quickly store to and recall from. Use nuggets as a scratch pad for short-term memory, storing information you might need later in the conversation, and for information the user explicitly asks you to remember.",
+    "Use nuggets as a scratch pad for short-term memory, storing information you might need later in the conversation, and for information the user explicitly asks you to remember.",
     "Use `user` memory for stable facts about the user, `self` memory for stable facts about Donna's own voice or working style, and `shared` memory for project or conversation context.",
     "Most importantly, you are not supposed to forget things, so make sure to save useful information into nuggets and retrieve from them often. Always check relevant nuggets before responding to the user.",
     soulPrompt,

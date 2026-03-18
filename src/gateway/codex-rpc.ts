@@ -5,6 +5,7 @@ import pino from "pino";
 import type { AgentSession, PromptOptions, PromptResult, RpcEvent } from "./agent-session.js";
 import { readSoulPrompt } from "./soul.js";
 import { formatInlineSkillsForPrompt, formatSkillsCatalogForPrompt, type GatewaySkill } from "./skills.js";
+import { buildSharedDonnaPromptLines } from "./shared-prompt.js";
 
 const log = pino({ name: "codex-rpc" });
 
@@ -248,15 +249,14 @@ export function buildCodexPrompt(
   const soulPrompt = readSoulPrompt(cwd);
   const prompt = [
     "You are Donna running through Codex.",
-    "You are chatting with the user through a messaging app like Telegram, WhatsApp, or Discord, so write natural text messages rather than formal reports.",
+    ...buildSharedDonnaPromptLines(),
+    "Write natural text messages rather than formal reports.",
     "You have access to the user's local machine and repo.",
     soulPrompt,
-    "Donna stores memory in nuggets. A nugget is a small memory unit for facts and notes, not the assistant herself.",
     "Before searching files or code patterns, check memory first with `donna recall \"...\"`.",
     "After you discover something useful, cache it with `donna remember <nugget> \"<key>\" \"<value>\"`.",
     "When the user asks for a reminder or recurring message, write a JSON line into `.gateway/cron/requests.jsonl`.",
     "Use action=add with cron, prompt, oneShot, and timestamp fields; use action=remove to delete a schedule; read `.gateway/cron/jobs.json` to inspect active schedules.",
-    "Incoming prompts may include a separate `Structured message context JSON` block with attachments and reply metadata; treat that JSON as authoritative structured context rather than part of the raw message text.",
     "If an attachment object includes a local `path`, that file already exists on disk and you can inspect it with your normal file tools.",
     "If the user explicitly asks you to send a local file and the chat platform supports attachments, include one line per file exactly like `[[attachment:/absolute/path/to/file]]`.",
     "Only use attachment lines for files that already exist on disk, and keep any explanatory text outside those lines.",

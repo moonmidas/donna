@@ -113,10 +113,15 @@ describe("soul prompt loading", () => {
     expect(codexPrompt).toContain("you already know.");
     expect(localPrompt).toContain("you already know.");
     expect(piPrompt).toContain("you already know.");
-    expect(codexPrompt).toContain("Donna stores memory in nuggets.");
+    for (const prompt of [codexPrompt, localPrompt, piPrompt]) {
+      expect(prompt).toContain("You are chatting with the user through a messaging app like Telegram, WhatsApp, or Discord.");
+      expect(prompt).toContain("Incoming prompts may include a separate `Structured message context JSON` block with attachments and reply metadata");
+      expect(prompt).toContain("Donna uses nuggets for memory.");
+      expect(prompt).toContain("A nugget is a small memory unit");
+    }
     expect(codexPrompt).toContain("donna remember <nugget>");
-    expect(piPrompt).toContain("A nugget is a small memory unit");
     expect(piPrompt).toContain("Use `user` memory for stable facts about the user");
+    expect(localPrompt).toContain("You do not have shell, file, scheduling, or direct Donna memory tools in this mode.");
 
     rmSync(soulDir, { recursive: true, force: true });
   });
