@@ -17,7 +17,7 @@ import { StringEnum } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
 import { matchesKey, Text, truncateToWidth } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
-import { DonnaShelf, promoteFacts } from "../../src/donna/index.js";
+import { NuggetShelf, promoteFacts } from "../../src/nuggets/index.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -50,7 +50,7 @@ const USER_SUBJECT = "user:primary";
 const SELF_SUBJECT = "assistant:self";
 const SHARED_SUBJECT = "shared:project";
 
-const shelf = new DonnaShelf();
+const shelf = new NuggetShelf();
 shelf.loadAll();
 
 function normalizeScope(scope?: string): MemoryScopeParam {
@@ -98,7 +98,7 @@ function noteMetaForScope(scope: MemoryScopeParam, type?: string, source?: strin
 }
 
 function shelfRemember(
-	donnaName: string,
+	nuggetName: string,
 	key: string,
 	value: string,
 	scope: MemoryScopeParam = "user",
@@ -106,33 +106,33 @@ function shelfRemember(
 	source?: string,
 	stability?: string,
 ): void {
-	const donna = shelf.getOrCreate(donnaName);
-	donna.remember(buildScopedKey(scope, key), value, {
+	const nugget = shelf.getOrCreate(nuggetName);
+	nugget.remember(buildScopedKey(scope, key), value, {
 		...noteMetaForScope(scope, type || inferTypeFromKey(key), source, stability),
 	});
 }
 
-function shelfRecall(query: string, donnaName?: string, sessionId = ""): {
+function shelfRecall(query: string, nuggetName?: string, sessionId = ""): {
 	found: boolean;
 	answer: string | null;
 	confidence: number;
-	donna_name: string | null;
+	nugget_name: string | null;
 	margin: number;
 } {
-	return shelf.recall(query, donnaName, sessionId);
+	return shelf.recall(query, nuggetName, sessionId);
 }
 
-function shelfForget(donnaName: string, key: string): boolean {
+function shelfForget(nuggetName: string, key: string): boolean {
 	try {
-		return shelf.get(donnaName).forget(key);
+		return shelf.get(nuggetName).forget(key);
 	} catch {
 		return false;
 	}
 }
 
-function shelfFacts(donnaName: string): Fact[] {
+function shelfFacts(nuggetName: string): Fact[] {
 	try {
-		return shelf.get(donnaName).facts().map((f) => ({ key: f.key, value: f.value }));
+		return shelf.get(nuggetName).facts().map((f) => ({ key: f.key, value: f.value }));
 	} catch {
 		return [];
 	}
@@ -392,7 +392,7 @@ export default function (pi: ExtensionAPI) {
 							content: [
 								{
 									type: "text",
-									text: `${result.answer}\n[confidence=${result.confidence.toFixed(3)}, source=${result.donna_name || "memory"}]`,
+									text: `${result.answer}\n[confidence=${result.confidence.toFixed(3)}, source=${result.nugget_name || "memory"}]`,
 								},
 							],
 							details: { action: "recall", facts: factsToRecord() } as DonnaDetails,
@@ -628,7 +628,7 @@ export default function (pi: ExtensionAPI) {
 	// -------------------------------------------------------------------
 
 	pi.registerCommand("donna", {
-		description: "Show all donna facts",
+		description: "Show all nugget facts",
 		handler: async (_args, ctx) => {
 			const allFacts = factsToList();
 

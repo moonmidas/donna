@@ -113,6 +113,9 @@ describe("soul prompt loading", () => {
     expect(codexPrompt).toContain("you already know.");
     expect(localPrompt).toContain("you already know.");
     expect(piPrompt).toContain("you already know.");
+    expect(codexPrompt).toContain("Donna stores memory in nuggets.");
+    expect(codexPrompt).toContain("donna remember <nugget>");
+    expect(piPrompt).toContain("A nugget is a small memory unit");
 
     rmSync(soulDir, { recursive: true, force: true });
   });

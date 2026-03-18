@@ -1,9 +1,9 @@
 import type { MemoryNote } from "./graph.js";
-import type { DonnaShelf } from "./shelf.js";
+import type { NuggetShelf } from "./shelf.js";
 
 export interface ReflectionChange {
   type: "rewrite" | "merge" | "hide" | "tag" | "link";
-  donnaName: string;
+  nuggetName: string;
   noteId: string;
   detail: string;
 }
@@ -121,12 +121,12 @@ function makeReason(shared: string[]): string {
 }
 
 export function reflectAndCleanMemory(
-  shelf: DonnaShelf,
-  opts?: { donnaName?: string; limit?: number },
+  shelf: NuggetShelf,
+  opts?: { nuggetName?: string; limit?: number },
 ): ReflectionResult {
   const limit = Math.max(1, Math.min(opts?.limit ?? 10, 10));
   const notes = shelf
-    .listNotes(opts?.donnaName, { includeHidden: true })
+    .listNotes(opts?.nuggetName, { includeHidden: true })
     .sort((a, b) => qualityScore(b) - qualityScore(a))
     .slice(0, limit);
 
@@ -144,16 +144,16 @@ export function reflectAndCleanMemory(
   const touched = new Set<string>();
 
   for (const entry of notes) {
-    const donna = shelf.get(entry.donna_name);
-    const note = donna.getNote(entry.id);
+    const nugget = shelf.get(entry.nugget_name);
+    const note = nugget.getNote(entry.id);
     if (!note || note.hidden) continue;
 
     if (isLowValue(note)) {
-      if (donna.deleteNote(note.id, false)) {
+      if (nugget.deleteNote(note.id, false)) {
         result.hidden += 1;
         result.changes.push({
           type: "hide",
-          donnaName: entry.donna_name,
+          nuggetName: entry.nugget_name,
           noteId: note.id,
           detail: "Archived low-value note",
         });
@@ -164,11 +164,11 @@ export function reflectAndCleanMemory(
 
     const normalized = normalizeContent(note.content);
     if (normalized && normalized !== note.content) {
-      donna.editNote(note.id, normalized, { rewrittenAt: result.ranAt });
+      nugget.editNote(note.id, normalized, { rewrittenAt: result.ranAt });
       result.rewritten += 1;
       result.changes.push({
         type: "rewrite",
-        donnaName: entry.donna_name,
+        nuggetName: entry.nugget_name,
         noteId: note.id,
         detail: "Normalized duplicated whitespace and repeated lines",
       });
@@ -176,24 +176,24 @@ export function reflectAndCleanMemory(
 
     const tags = deriveTags(note);
     if (tags.join("|") !== note.tags.join("|")) {
-      donna.updateNote(note.id, { tags, lastRewrittenAt: result.ranAt });
+      nugget.updateNote(note.id, { tags, lastRewrittenAt: result.ranAt });
       result.tagged += 1;
       result.changes.push({
         type: "tag",
-        donnaName: entry.donna_name,
+        nuggetName: entry.nugget_name,
         noteId: note.id,
         detail: `Tags -> ${tags.join(", ")}`,
       });
     }
   }
 
-  const liveNotes = shelf.listNotes(opts?.donnaName);
+  const liveNotes = shelf.listNotes(opts?.nuggetName);
   for (let i = 0; i < liveNotes.length; i++) {
     if (result.merged >= limit) break;
     for (let j = i + 1; j < liveNotes.length; j++) {
       const a = liveNotes[i];
       const b = liveNotes[j];
-      if (a.donna_name !== b.donna_name) continue;
+      if (a.nugget_name !== b.nugget_name) continue;
       if (a.hidden || b.hidden) continue;
       if (touched.has(a.id) || touched.has(b.id)) continue;
 
@@ -206,7 +206,7 @@ export function reflectAndCleanMemory(
 
       const winner = a.content.length >= b.content.length ? a : b;
       const loser = winner.id === a.id ? b : a;
-      const merged = shelf.get(winner.donna_name).mergeNotes(
+      const merged = shelf.get(winner.nugget_name).mergeNotes(
         winner.id,
         loser.id,
         "merged during daily memory reflection",
@@ -215,7 +215,7 @@ export function reflectAndCleanMemory(
         result.merged += 1;
         result.changes.push({
           type: "merge",
-          donnaName: winner.donna_name,
+          nuggetName: winner.nugget_name,
           noteId: merged.id,
           detail: `Merged duplicate note ${loser.id}`,
         });
@@ -225,14 +225,14 @@ export function reflectAndCleanMemory(
     }
   }
 
-  const refreshed = shelf.listNotes(opts?.donnaName);
+  const refreshed = shelf.listNotes(opts?.nuggetName);
   for (const note of refreshed) {
     if (result.linked >= limit) break;
     if (note.hidden || note.links.length >= 2) continue;
     const baseTokens = tokenize(`${note.title} ${note.content}`);
 
     for (const other of refreshed) {
-      if (other.id === note.id || other.donna_name !== note.donna_name || other.hidden) continue;
+      if (other.id === note.id || other.nugget_name !== note.nugget_name || other.hidden) continue;
       if (
         other.subject !== note.subject &&
         note.scope !== "shared" &&
@@ -246,12 +246,12 @@ export function reflectAndCleanMemory(
       const overlap = uniq(baseTokens.filter((token) => otherTokens.includes(token)));
       if (overlap.length < 2) continue;
 
-      const linked = shelf.addLink(note.donna_name, note.id, other.id, makeReason(overlap));
+      const linked = shelf.addLink(note.nugget_name, note.id, other.id, makeReason(overlap));
       if (linked) {
         result.linked += 1;
         result.changes.push({
           type: "link",
-          donnaName: note.donna_name,
+          nuggetName: note.nugget_name,
           noteId: note.id,
           detail: `Linked to ${other.id}`,
         });

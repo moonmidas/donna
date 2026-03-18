@@ -12,7 +12,7 @@ import {
   corvacsLite,
   softmaxTemp,
   type ComplexVector,
-} from "../src/donna/core.js";
+} from "../src/nuggets/core.js";
 
 function magnitude(v: ComplexVector, d: number): number {
   return Math.sqrt(v.re[d] * v.re[d] + v.im[d] * v.im[d]);

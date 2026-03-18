@@ -6,8 +6,8 @@ import {
   DEFAULT_SAVE_DIR,
   LEGACY_SAVE_DIR,
   migrateLegacySaveDir,
-  Donna,
-} from "../src/donna/memory.js";
+  Nugget,
+} from "../src/nuggets/memory.js";
 
 let tmpDir: string;
 
@@ -19,14 +19,14 @@ afterEach(() => {
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
-describe("Donna", () => {
-  it("uses Donna as the default save directory", () => {
+describe("Nugget", () => {
+  it("uses Donna as the default save directory while keeping Nuggets as the memory unit", () => {
     expect(DEFAULT_SAVE_DIR.endsWith(".donna")).toBe(true);
     expect(LEGACY_SAVE_DIR.endsWith(".nuggets")).toBe(true);
   });
 
   it("saves new memory files with the Donna extension", () => {
-    const n = new Donna({ name: "persist", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "persist", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("lang", "typescript");
 
     const path = n.save();
@@ -35,8 +35,8 @@ describe("Donna", () => {
     expect(existsSync(path)).toBe(true);
   });
 
-  it("copies legacy Donna storage into Donna storage without overwriting newer files", () => {
-    const legacyDir = join(tmpDir, ".donna");
+  it("copies legacy Nuggets storage into Donna storage without overwriting newer files", () => {
+    const legacyDir = join(tmpDir, ".nuggets");
     const donnaDir = join(tmpDir, ".donna");
     mkdirSync(join(legacyDir, "graph"), { recursive: true });
     writeFileSync(join(legacyDir, "memory.nugget.json"), JSON.stringify({ hello: "world" }));
@@ -54,7 +54,7 @@ describe("Donna", () => {
   });
 
   it("remembers and recalls a fact", () => {
-    const n = new Donna({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("color", "blue");
     const result = n.recall("color");
     expect(result.found).toBe(true);
@@ -63,7 +63,7 @@ describe("Donna", () => {
   });
 
   it("upserts on duplicate key", () => {
-    const n = new Donna({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("color", "blue");
     n.remember("color", "red");
     expect(n.facts()).toHaveLength(1);
@@ -72,7 +72,7 @@ describe("Donna", () => {
   });
 
   it("forgets a fact", () => {
-    const n = new Donna({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("color", "blue");
     expect(n.forget("color")).toBe(true);
     expect(n.facts()).toHaveLength(0);
@@ -80,7 +80,7 @@ describe("Donna", () => {
   });
 
   it("clears all facts", () => {
-    const n = new Donna({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("a", "1");
     n.remember("b", "2");
     n.clear();
@@ -88,7 +88,7 @@ describe("Donna", () => {
   });
 
   it("returns correct status", () => {
-    const n = new Donna({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("a", "1");
     const s = n.status();
     expect(s.name).toBe("test");
@@ -98,12 +98,12 @@ describe("Donna", () => {
   });
 
   it("saves and loads from JSON", () => {
-    const n = new Donna({ name: "persist", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "persist", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("lang", "typescript");
     n.remember("color", "green");
     const path = n.save();
 
-    const loaded = Donna.load(path, { autoSave: false });
+    const loaded = Nugget.load(path, { autoSave: false });
     expect(loaded.name).toBe("persist");
     expect(loaded.facts()).toHaveLength(2);
 
@@ -113,7 +113,7 @@ describe("Donna", () => {
   });
 
   it("tracks hit counts per session", () => {
-    const n = new Donna({ name: "hits", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "hits", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("key", "value");
 
     n.recall("key", "session-1");
@@ -125,7 +125,7 @@ describe("Donna", () => {
   });
 
   it("enforces max_facts limit", () => {
-    const n = new Donna({ name: "limited", D: 512, banks: 2, autoSave: false, maxFacts: 3, saveDir: tmpDir });
+    const n = new Nugget({ name: "limited", D: 512, banks: 2, autoSave: false, maxFacts: 3, saveDir: tmpDir });
     n.remember("a", "1");
     n.remember("b", "2");
     n.remember("c", "3");
@@ -135,7 +135,7 @@ describe("Donna", () => {
   });
 
   it("handles multiple facts with distinct values", () => {
-    const n = new Donna({ name: "multi", D: 1024, banks: 4, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "multi", D: 1024, banks: 4, autoSave: false, saveDir: tmpDir });
     n.remember("name", "Alice");
     n.remember("pet", "cat");
     n.remember("city", "London");
@@ -154,7 +154,7 @@ describe("Donna", () => {
   });
 
   it("fuzzy matches keys", () => {
-    const n = new Donna({ name: "fuzzy", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "fuzzy", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("favorite color", "blue");
 
     // Substring match
@@ -164,14 +164,14 @@ describe("Donna", () => {
   });
 
   it("returns not-found for unknown queries", () => {
-    const n = new Donna({ name: "empty", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "empty", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     const result = n.recall("anything");
     expect(result.found).toBe(false);
     expect(result.answer).toBeNull();
   });
 
   it("ignores empty key/value on remember", () => {
-    const n = new Donna({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "test", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("", "value");
     n.remember("key", "");
     n.remember("  ", "value");
@@ -179,7 +179,7 @@ describe("Donna", () => {
   });
 
   it("mirrors facts into graph notes and can search them", () => {
-    const n = new Donna({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("favorite color", "blue");
 
     const notes = n.listNotes();
@@ -192,7 +192,7 @@ describe("Donna", () => {
   });
 
   it("edits fact notes and keeps the fact API in sync", () => {
-    const n = new Donna({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     n.remember("favorite color", "blue");
     const note = n.listNotes()[0];
 
@@ -201,7 +201,7 @@ describe("Donna", () => {
   });
 
   it("creates and updates free-form notes", () => {
-    const n = new Donna({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
     const note = n.createNote("shopping list", "milk\nmilk\nbread", ["personal"]);
     const updated = n.editNote(note.id, "milk\nbread\neggs", { tags: ["personal", "shopping"] });
 
@@ -211,7 +211,7 @@ describe("Donna", () => {
   });
 
   it("infers self/user/shared metadata from scoped fact keys", () => {
-    const n = new Donna({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
 
     n.remember("self:name", "astra");
     n.remember("user:tone", "playful");
@@ -234,7 +234,7 @@ describe("Donna", () => {
   });
 
   it("filters note search by memory scope", () => {
-    const n = new Donna({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
+    const n = new Nugget({ name: "graph", D: 512, banks: 2, autoSave: false, saveDir: tmpDir });
 
     n.createNote("self:voice", "casual lowercase guidance", [], {
       scope: "self",
@@ -278,7 +278,7 @@ describe("Donna", () => {
       }),
     );
 
-    const loaded = Donna.load(donnaPath, { autoSave: false });
+    const loaded = Nugget.load(donnaPath, { autoSave: false });
     expect(loaded.facts().map((fact) => fact.key).sort()).toEqual([
       "self:assistant_name",
       "shared:server_features",
@@ -359,7 +359,7 @@ describe("Donna", () => {
       }),
     );
 
-    const loaded = Donna.load(donnaPath, { autoSave: false });
+    const loaded = Nugget.load(donnaPath, { autoSave: false });
     const notes = loaded.listNotes({ includeHidden: true }).sort((a, b) => a.title.localeCompare(b.title));
 
     expect(notes.map((note) => note.scope)).toEqual(["self", "user"]);

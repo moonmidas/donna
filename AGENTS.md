@@ -1,13 +1,13 @@
 # Donna — FHRR Memory + Living Note Graph
 
-This project uses `donna` for persistent memory.
+This project uses the `donna` CLI for persistent memory stored in nuggets.
 
 The memory system now has three layers:
 - FHRR-backed fact recall for fast `remember` / `recall` / `forget`
 - A Zettelkasten-style graph in `~/.donna/graph/graph.json`
 - A daily reflection pass that rewrites, merges, tags, and links notes
 
-## When to use Donna
+## When to use Donna memory
 
 **Before searching for files or code patterns**, check memory first:
 ```bash
@@ -16,7 +16,7 @@ donna recall "what you're looking for"
 
 **After discovering something useful**, cache it:
 ```bash
-donna remember <donna> "<key>" "<value>"
+donna remember <nugget> "<key>" "<value>"
 ```
 
 ## What to remember
@@ -44,10 +44,10 @@ Use the graph layer when the memory is more than a one-line fact:
 ## Commands
 
 ```bash
-donna remember <donna> <key> <value>   # Store or update a fact
-donna recall <query>                     # Search all donna
-donna recall <query> --donna <name>     # Search one donna
-donna forget <donna> <key>              # Remove a fact
-donna list                               # Show all donna
-donna facts <donna>                     # Show facts in a donna
+donna remember <nugget> <key> <value>   # Store or update a fact
+donna recall <query>                     # Search all nuggets
+donna recall <query> --nugget <name>     # Search one nugget
+donna forget <nugget> <key>              # Remove a fact
+donna list                               # Show all nuggets
+donna facts <nugget>                     # Show facts in a nugget
 ```

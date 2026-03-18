@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { DonnaShelf } from "../src/donna/shelf.js";
+import { NuggetShelf } from "../src/nuggets/shelf.js";
 
 let tmpDir: string;
 
@@ -14,9 +14,9 @@ afterEach(() => {
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
-describe("DonnaShelf", () => {
-  it("creates and retrieves donna", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+describe("NuggetShelf", () => {
+  it("creates and retrieves nuggets", () => {
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     const n = shelf.create("test", { D: 512, banks: 2 });
     expect(n.name).toBe("test");
     expect(shelf.get("test")).toBe(n);
@@ -24,33 +24,33 @@ describe("DonnaShelf", () => {
   });
 
   it("throws on duplicate create", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("test");
     expect(() => shelf.create("test")).toThrow("already exists");
   });
 
   it("throws on get missing", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     expect(() => shelf.get("nope")).toThrow("not found");
   });
 
   it("getOrCreate creates on first call and returns on second", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     const n1 = shelf.getOrCreate("test");
     const n2 = shelf.getOrCreate("test");
     expect(n1).toBe(n2);
   });
 
-  it("removes donna and deletes files", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: true });
+  it("removes nuggets and deletes files", () => {
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: true });
     shelf.create("doomed", { D: 512, banks: 2 });
     shelf.remember("doomed", "key", "val");
     shelf.remove("doomed");
     expect(shelf.size).toBe(0);
   });
 
-  it("remembers and recalls across donna", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+  it("remembers and recalls across nuggets", () => {
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("prefs", { D: 512, banks: 2 });
     shelf.create("facts", { D: 512, banks: 2 });
 
@@ -61,32 +61,32 @@ describe("DonnaShelf", () => {
     const r1 = shelf.recall("color", "prefs");
     expect(r1.found).toBe(true);
     expect(r1.answer).toBe("blue");
-    expect(r1.donna_name).toBe("prefs");
+    expect(r1.nugget_name).toBe("prefs");
 
     // Broadcast recall
     const r2 = shelf.recall("city");
     expect(r2.found).toBe(true);
     expect(r2.answer).toBe("London");
-    expect(r2.donna_name).toBe("facts");
+    expect(r2.nugget_name).toBe("facts");
   });
 
-  it("saves and loads all donna", () => {
-    const shelf1 = new DonnaShelf({ saveDir: tmpDir, autoSave: true });
+  it("saves and loads all nuggets", () => {
+    const shelf1 = new NuggetShelf({ saveDir: tmpDir, autoSave: true });
     shelf1.create("a", { D: 512, banks: 2 });
     shelf1.create("b", { D: 512, banks: 2 });
     shelf1.remember("a", "k1", "v1");
     shelf1.remember("b", "k2", "v2");
     shelf1.saveAll();
 
-    const shelf2 = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf2 = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf2.loadAll();
     expect(shelf2.size).toBe(2);
     expect(shelf2.recall("k1", "a").answer).toBe("v1");
     expect(shelf2.recall("k2", "b").answer).toBe("v2");
   });
 
-  it("lists donna statuses", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+  it("lists nugget statuses", () => {
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("one", { D: 512, banks: 2 });
     shelf.create("two", { D: 512, banks: 2 });
     const list = shelf.list();
@@ -95,39 +95,39 @@ describe("DonnaShelf", () => {
   });
 
   it("has() checks existence", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("exists");
     expect(shelf.has("exists")).toBe(true);
     expect(shelf.has("nope")).toBe(false);
   });
 
   it("broadcast recall returns best confidence", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("a", { D: 512, banks: 2 });
     shelf.create("b", { D: 512, banks: 2 });
 
     shelf.remember("a", "color", "red");
     shelf.remember("b", "color", "blue");
 
-    // Both donna have "color" key — broadcast should return one
+    // Both nuggets have "color" key — broadcast should return one
     const r = shelf.recall("color");
     expect(r.found).toBe(true);
     expect(["red", "blue"]).toContain(r.answer);
   });
 
   it("creates and searches graph notes across the shelf", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("memory", { D: 512, banks: 2 });
 
     const note = shelf.createNote("memory", "shopping list", "milk bread eggs", ["shopping"]);
     const results = shelf.searchNotes("eggs");
 
     expect(results[0].note.id).toBe(note.id);
-    expect(results[0].donna_name).toBe("memory");
+    expect(results[0].nugget_name).toBe("memory");
   });
 
   it("reflects and cleans memory notes safely", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("memory", { D: 512, banks: 2 });
 
     shelf.createNote("memory", "shopping list", "milk bread");
@@ -141,7 +141,7 @@ describe("DonnaShelf", () => {
   });
 
   it("keeps self and user notes separate during reflection", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("memory", { D: 512, banks: 2 });
 
     shelf.createNote("memory", "self:voice", "casual lowercase", [], {
@@ -168,7 +168,7 @@ describe("DonnaShelf", () => {
   });
 
   it("filters note search across the shelf by scope", () => {
-    const shelf = new DonnaShelf({ saveDir: tmpDir, autoSave: false });
+    const shelf = new NuggetShelf({ saveDir: tmpDir, autoSave: false });
     shelf.create("memory", { D: 512, banks: 2 });
 
     shelf.createNote("memory", "self:identity", "name is astra", [], {

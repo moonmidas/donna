@@ -28,18 +28,18 @@ Most agents forget between sessions. RAG fixes that, but it usually means embedd
 
 - `SOUL.md` defines Donna's shared voice, judgment, and working style across all backends.
 
-### Memory Engine (`src/donna/`)
+### Memory Engine (`src/nuggets/`)
 
 The memory stack is pure TypeScript and stays local.
 
 - `core.ts` - FHRR math primitives: phase keys, bind, unbind, orthogonalize, sharpen
-- `memory.ts` - `Donna` fact API: `remember`, `recall`, `forget`
+- `memory.ts` - `Nugget` fact API: `remember`, `recall`, `forget`
 - `graph.ts` - graph note storage in `~/.donna/graph/graph.json`
 - `rewrite.ts` - bounded reflection pass for cleanup and self-improvement
-- `shelf.ts` - multi-donna manager plus graph helpers
+- `shelf.ts` - multi-nugget manager plus graph helpers
 - `promote.ts` - promotion from graph notes to `MEMORY.md`
 
-Each donna still behaves like topic-scoped memory, but now it has two levels:
+Each nugget still behaves like topic-scoped memory, but now it has two levels:
 - **facts** for very short key-value memory
 - **notes** for richer linked memory
 
@@ -159,7 +159,7 @@ You (Telegram / WhatsApp / Discord)
 Gateway -> router -> backend session
   |                    |
   |                    v
-  |              Donna memory stack
+  |              nuggets memory stack
   |              - FHRR facts
   |              - graph notes
   |              - rewrite pass
@@ -172,7 +172,7 @@ Gateway -> router -> backend session
 
 Normal path:
 1. User sends a message.
-2. Backend answers and can query Donna first.
+2. Backend answers and can query nuggets first.
 3. Useful facts or notes get stored.
 4. High-value notes are promoted to `MEMORY.md`.
 
@@ -185,7 +185,7 @@ Proactive path:
 
 ```text
 src/
-  donna/
+  nuggets/
     core.ts
     memory.ts
     graph.ts

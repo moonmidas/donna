@@ -12,13 +12,13 @@ import {
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 import type { MemoryNote } from "./graph.js";
-import type { DonnaShelf } from "./shelf.js";
+import type { NuggetShelf } from "./shelf.js";
 
 const PROMOTE_THRESHOLD = 3;
 
 const MEMORY_MD_HEADER = `# Memory
 
-Auto-promoted from donna graph notes (3+ recalls across sessions).
+Auto-promoted from nugget graph notes (3+ recalls across sessions).
 `;
 
 function detectMemoryDir(): string | null {
@@ -90,7 +90,7 @@ function sectionForNote(note: MemoryNote, fallback: string): string {
   return fallback;
 }
 
-export function promoteFacts(shelf: DonnaShelf): number {
+export function promoteFacts(shelf: NuggetShelf): number {
   const memoryDir = detectMemoryDir();
   if (!memoryDir) return 0;
 

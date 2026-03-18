@@ -5,6 +5,7 @@ dist/
 .env
 dump/
 .DS_Store
+docs/superpowers/
 
 # Python (legacy)
 __pycache__/

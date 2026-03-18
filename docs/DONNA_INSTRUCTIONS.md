@@ -3,6 +3,7 @@
 ## What Donna is now
 
 Donna is a local memory stack with three cooperating parts:
+- Facts live inside nuggets, which are the memory units Donna reads and writes
 - **FHRR fact memory** for fast algebraic recall of short key-value facts
 - **A note graph** for richer Zettelkasten-style memory with tags and links
 - **Autonomous rewriting** so old notes get cleaned up every day
@@ -12,11 +13,11 @@ Think of it as an L1 cache plus a living notebook.
 ## Fact CLI
 
 ```bash
-donna remember <donna> <key> <value>    # Store a fact
-donna recall <query> [--donna <name>]   # Query memory
-donna forget <donna> <key>              # Remove a fact
-donna list                               # List all donna
-donna facts <donna>                     # List facts in a donna
+donna remember <nugget> <key> <value>    # Store a fact
+donna recall <query> [--nugget <name>]   # Query memory
+donna forget <nugget> <key>              # Remove a fact
+donna list                               # List all nuggets
+donna facts <nugget>                     # List facts in a nugget
 ```
 
 ## Recall-first pattern

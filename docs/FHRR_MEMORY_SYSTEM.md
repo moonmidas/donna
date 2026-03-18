@@ -5,9 +5,9 @@
 ## What changed
 
 The original design doc described an HRR-style holographic fact store. The current codebase now uses:
-- **FHRR phase vectors** in `src/donna/core.ts`
-- **Graph-backed notes** in `src/donna/graph.ts`
-- **Daily cleanup and reflection** in `src/donna/rewrite.ts`
+- **FHRR phase vectors** in `src/nuggets/core.ts`
+- **Graph-backed notes** in `src/nuggets/graph.ts`
+- **Daily cleanup and reflection** in `src/nuggets/rewrite.ts`
 
 ## Current architecture
 
@@ -28,7 +28,7 @@ This keeps the fact API stable while making recall cleaner for similar facts.
 
 ### 2. Zettelkasten graph layer
 
-Each donna now also owns notes stored in:
+Each nugget now also owns notes stored in:
 
 ```text
 ~/.donna/graph/graph.json
@@ -57,12 +57,12 @@ The pass is capped at 10 notes per run.
 
 ## Current file map
 
-- `src/donna/core.ts` - FHRR math
-- `src/donna/memory.ts` - fact API + graph sync
-- `src/donna/graph.ts` - note graph persistence and search
-- `src/donna/shelf.ts` - multi-donna orchestration
-- `src/donna/promote.ts` - `MEMORY.md` promotion from notes
-- `src/donna/rewrite.ts` - safe reflection logic
+- `src/nuggets/core.ts` - FHRR math
+- `src/nuggets/memory.ts` - fact API + graph sync
+- `src/nuggets/graph.ts` - note graph persistence and search
+- `src/nuggets/shelf.ts` - multi-nugget orchestration
+- `src/nuggets/promote.ts` - `MEMORY.md` promotion from notes
+- `src/nuggets/rewrite.ts` - safe reflection logic
 - `src/gateway/heartbeat.ts` - waking-hours fallback trigger
 - `src/gateway/cron.ts` - daily 9 AM system maintenance job
 - `.pi/extensions/donna.ts` - fact and note tools

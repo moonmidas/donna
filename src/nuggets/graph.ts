@@ -56,7 +56,7 @@ export interface NoteMetadata {
 
 export interface MemoryNote extends NoteMetadata {
   id: string;
-  donnaName: string;
+  nuggetName: string;
   title: string;
   content: string;
   tags: string[];
@@ -399,10 +399,10 @@ function matchesFilters(note: MemoryNote, opts?: NoteFilterOptions): boolean {
 
 function normalizeGraph(graph: GraphFile): GraphFile {
   const notes = (graph.notes || []).map((rawNote) => {
-    const legacyNote = rawNote as MemoryNote & { nuggetName?: string };
+    const legacyNote = rawNote as MemoryNote & { nuggetName?: string; donnaName?: string };
     const note = {
       ...legacyNote,
-      donnaName: legacyNote.donnaName ?? legacyNote.nuggetName ?? "",
+      nuggetName: legacyNote.nuggetName ?? legacyNote.donnaName ?? "",
     };
     const legacyUnscoped =
       graph.version < 3 &&
@@ -427,7 +427,7 @@ function normalizeGraph(graph: GraphFile): GraphFile {
       : mergeMetadata(note, note);
     return {
       ...note,
-      donnaName: note.donnaName,
+      nuggetName: note.nuggetName,
       title: migratedTitle,
       content: normaliseWhitespace(note.content ?? ""),
       tags: unique((note.tags || []).map(normalizeTag)).filter(Boolean),
@@ -447,13 +447,13 @@ function normalizeGraph(graph: GraphFile): GraphFile {
   return { version: 3, notes };
 }
 
-export class DonnaGraph {
+export class NuggetGraph {
   private readonly graphDir: string;
   private readonly graphPath: string;
 
   constructor(
     private readonly saveDir: string,
-    private readonly donnaName: string,
+    private readonly nuggetName: string,
     private readonly D: number,
   ) {
     this.graphDir = join(saveDir, "graph");
@@ -463,14 +463,14 @@ export class DonnaGraph {
   listNotes(opts?: NoteFilterOptions): MemoryNote[] {
     const graph = this.load();
     return graph.notes
-      .filter((note) => note.donnaName === this.donnaName)
+      .filter((note) => note.nuggetName === this.nuggetName)
       .filter((note) => matchesFilters(note, opts))
       .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt));
   }
 
   getNote(id: string): MemoryNote | null {
     return this.load().notes.find(
-      (note) => note.donnaName === this.donnaName && note.id === id,
+      (note) => note.nuggetName === this.nuggetName && note.id === id,
     ) || null;
   }
 
@@ -489,14 +489,14 @@ export class DonnaGraph {
     const graph = this.load();
     const now = new Date().toISOString();
     const existing = graph.notes.find((note) =>
-      note.donnaName === this.donnaName &&
+      note.nuggetName === this.nuggetName &&
       note.kind === "fact" &&
       note.sourceKey?.toLowerCase() === key.toLowerCase()
     );
 
     const base = existing ?? {
-      id: `fact-${this.donnaName}-${randomUUID().slice(0, 8)}`,
-      donnaName: this.donnaName,
+      id: `fact-${this.nuggetName}-${randomUUID().slice(0, 8)}`,
+      nuggetName: this.nuggetName,
       title: key.trim(),
       content: "",
       tags: [],
@@ -539,7 +539,7 @@ export class DonnaGraph {
       sourceKey: key.trim(),
       tags: unique([
         ...base.tags,
-        this.donnaName,
+        this.nuggetName,
         `scope:${metadata.scope}`,
         `type:${metadata.type}`,
         ...titleToTags(key),
@@ -580,12 +580,12 @@ export class DonnaGraph {
     const metadata = mergeMetadata(baseNote, undefined, meta);
 
     const note: MemoryNote = {
-      id: `note-${this.donnaName}-${randomUUID().slice(0, 8)}`,
-      donnaName: this.donnaName,
+      id: `note-${this.nuggetName}-${randomUUID().slice(0, 8)}`,
+      nuggetName: this.nuggetName,
       title: baseNote.title,
       content: baseNote.content,
       tags: unique([
-        this.donnaName,
+        this.nuggetName,
         ...baseNote.tags,
         `scope:${metadata.scope}`,
         `type:${metadata.type}`,
@@ -614,7 +614,7 @@ export class DonnaGraph {
   ): MemoryNote | null {
     const graph = this.load();
     const note = graph.notes.find((entry) =>
-      entry.donnaName === this.donnaName && entry.id === noteId
+      entry.nuggetName === this.nuggetName && entry.id === noteId
     );
     if (!note) return null;
 
@@ -643,10 +643,10 @@ export class DonnaGraph {
     return note;
   }
 
-  updateNote(noteId: string, updates: Partial<Omit<MemoryNote, "id" | "donnaName">>): MemoryNote | null {
+  updateNote(noteId: string, updates: Partial<Omit<MemoryNote, "id" | "nuggetName">>): MemoryNote | null {
     const graph = this.load();
     const note = graph.notes.find((entry) =>
-      entry.donnaName === this.donnaName && entry.id === noteId
+      entry.nuggetName === this.nuggetName && entry.id === noteId
     );
     if (!note) return null;
 
@@ -685,7 +685,7 @@ export class DonnaGraph {
     const graph = this.load();
     const before = graph.notes.length;
     graph.notes = graph.notes.filter((note) => !(
-      note.donnaName === this.donnaName &&
+      note.nuggetName === this.nuggetName &&
       note.kind === "fact" &&
       note.sourceKey?.toLowerCase() === key.toLowerCase()
     ));
@@ -698,8 +698,8 @@ export class DonnaGraph {
   addLink(fromId: string, toId: string, reason: string): boolean {
     if (fromId === toId) return false;
     const graph = this.load();
-    const from = graph.notes.find((note) => note.donnaName === this.donnaName && note.id === fromId);
-    const to = graph.notes.find((note) => note.donnaName === this.donnaName && note.id === toId);
+    const from = graph.notes.find((note) => note.nuggetName === this.nuggetName && note.id === fromId);
+    const to = graph.notes.find((note) => note.nuggetName === this.nuggetName && note.id === toId);
     if (!from || !to) return false;
 
     const timestamp = new Date().toISOString();
@@ -715,7 +715,7 @@ export class DonnaGraph {
 
   deleteNote(noteId: string, hard = false): boolean {
     const graph = this.load();
-    const note = graph.notes.find((entry) => entry.donnaName === this.donnaName && entry.id === noteId);
+    const note = graph.notes.find((entry) => entry.nuggetName === this.nuggetName && entry.id === noteId);
     if (!note) return false;
 
     if (hard) {
@@ -735,14 +735,14 @@ export class DonnaGraph {
 
   removeAllNotes(): void {
     const graph = this.load();
-    graph.notes = graph.notes.filter((note) => note.donnaName !== this.donnaName);
+    graph.notes = graph.notes.filter((note) => note.nuggetName !== this.nuggetName);
     this.removeDanglingLinks(graph);
     this.save(graph);
   }
 
   recordHit(noteId: string, sessionId = ""): void {
     const graph = this.load();
-    const note = graph.notes.find((entry) => entry.donnaName === this.donnaName && entry.id === noteId);
+    const note = graph.notes.find((entry) => entry.nuggetName === this.nuggetName && entry.id === noteId);
     if (!note) return;
     if (!sessionId || note.lastHitSession !== sessionId) {
       note.hits += 1;
@@ -756,8 +756,8 @@ export class DonnaGraph {
   mergeNotes(targetId: string, sourceId: string, reason: string): MemoryNote | null {
     if (targetId === sourceId) return null;
     const graph = this.load();
-    const target = graph.notes.find((note) => note.donnaName === this.donnaName && note.id === targetId);
-    const source = graph.notes.find((note) => note.donnaName === this.donnaName && note.id === sourceId);
+    const target = graph.notes.find((note) => note.nuggetName === this.nuggetName && note.id === targetId);
+    const source = graph.notes.find((note) => note.nuggetName === this.nuggetName && note.id === sourceId);
     if (!target || !source) return null;
 
     const mergedLines = unique([
@@ -785,7 +785,7 @@ export class DonnaGraph {
     source.vector = this.buildVectorSpec(source);
 
     for (const note of graph.notes) {
-      if (note.donnaName !== this.donnaName) continue;
+      if (note.nuggetName !== this.nuggetName) continue;
       note.links = note.links.map((link) =>
         link.to === source.id ? { ...link, to: target.id } : link
       );

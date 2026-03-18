@@ -5,7 +5,7 @@
 import { StringEnum } from "@mariozechner/pi-ai";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { DonnaShelf, promoteFacts } from "../../src/donna/index.js";
+import { NuggetShelf, promoteFacts } from "../../src/nuggets/index.js";
 
 const REQUESTS_FILE = ".gateway/cron/requests.jsonl";
 
@@ -37,8 +37,8 @@ async function writeRequest(
   }
 }
 
-function loadShelf(): DonnaShelf {
-  const shelf = new DonnaShelf();
+function loadShelf(): NuggetShelf {
+  const shelf = new NuggetShelf();
   shelf.loadAll();
   shelf.getOrCreate("memory");
   return shelf;
@@ -183,7 +183,7 @@ export default function proactive(pi: ExtensionAPI) {
     name: "reflectAndCleanMemory",
     label: "Reflect And Clean Memory",
     description:
-      "Run a safe maintenance pass over the Donna note graph. " +
+      "Run a safe maintenance pass over the Nugget note graph. " +
       "It rewrites stale notes, merges near-duplicates, improves tags and links, and archives low-value notes.",
     promptSnippet: "reflectAndCleanMemory: run a safe daily memory cleanup pass",
     promptGuidelines: [

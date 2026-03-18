@@ -513,8 +513,8 @@ export function buildPiAppendSystemPrompt(cwd = process.cwd()): string {
     "Do NOT use local notifications, desktop alerts, or OS-level reminders — the user will never see them.",
     "For reminders and scheduled messages, use the `schedule` tool which delivers messages through the active chat channel.",
     "If the user explicitly asks you to send a local file and the chat platform supports attachments, include one line per file exactly like `[[attachment:/absolute/path/to/file]]`.",
-    "you have access to a donna, where you can quickly store and retrieve information. Use it as a scratch pad for short-term memory, storing information you might need later in the conversation, and for storing information that the user explicitly asks you to remember.",
-    "most importantly, you are not supposed to forget things so make sure to save as much information as possible to the donna, and retrieve from it often. Always check the donna for relevant information before responding to the user.",
+    "Donna uses nuggets for memory. A nugget is a small memory unit you can quickly store to and recall from. Use nuggets as a scratch pad for short-term memory, storing information you might need later in the conversation, and for information the user explicitly asks you to remember.",
+    "Most importantly, you are not supposed to forget things, so make sure to save useful information into nuggets and retrieve from them often. Always check relevant nuggets before responding to the user.",
     soulPrompt,
   ].filter(Boolean).join(" ");
 }

@@ -1,5 +1,5 @@
 /**
- * Donna — a single holographic memory unit.
+ * Nugget — a single holographic memory unit.
  *
  * Facts are still stored as key/value entries and recalled through the same
  * public API, but each fact is now mirrored into a Zettelkasten-style note
@@ -36,7 +36,7 @@ import {
 import {
   type GraphNoteMetaInput,
   hasScopedKeyPrefix,
-  DonnaGraph,
+  NuggetGraph,
   type MemoryNote,
   type NoteFilterOptions,
   prefixScopedKey,
@@ -45,10 +45,12 @@ import {
 
 export const LEGACY_SAVE_DIR = join(homedir(), ".nuggets");
 export const DEFAULT_SAVE_DIR = join(homedir(), ".donna");
+export const LEGACY_SAVE_EXT = ".nugget.json";
+export const SAVE_EXT = ".donna.json";
 
 function mapLegacyEntryName(name: string): string {
-  return name.endsWith(".nugget.json")
-    ? name.replace(/\.nugget\.json$/u, ".donna.json")
+  return name.endsWith(LEGACY_SAVE_EXT)
+    ? name.replace(/\.nugget\.json$/u, SAVE_EXT)
     : name;
 }
 
@@ -106,7 +108,7 @@ interface EnsembleData {
   banks: BankData[];
 }
 
-interface DonnaFile {
+interface NuggetFile {
   version: number;
   name: string;
   D: number;
@@ -122,12 +124,12 @@ interface DonnaFile {
   };
 }
 
-export class Donna {
+export class Nugget {
   readonly name: string;
   readonly D: number;
   readonly banks: number;
   readonly ensembles: number;
-  readonly graph: DonnaGraph;
+  readonly graph: NuggetGraph;
   autoSave: boolean;
   saveDir: string;
   maxFacts: number;
@@ -164,7 +166,7 @@ export class Donna {
       migrateLegacySaveDir(this.saveDir);
     }
     this.maxFacts = opts.maxFacts ?? 0;
-    this.graph = new DonnaGraph(this.saveDir, this.name, this.D);
+    this.graph = new NuggetGraph(this.saveDir, this.name, this.D);
   }
 
   remember(key: string, value: string, noteMeta?: GraphNoteMetaInput): void {
@@ -305,7 +307,7 @@ export class Donna {
     return updated;
   }
 
-  updateNote(noteId: string, updates: Partial<Omit<MemoryNote, "id" | "donnaName">>): MemoryNote | null {
+  updateNote(noteId: string, updates: Partial<Omit<MemoryNote, "id" | "nuggetName">>): MemoryNote | null {
     const previous = this.graph.getNote(noteId);
     const updated = this.graph.updateNote(noteId, updates);
     if (!updated) return null;
@@ -420,10 +422,10 @@ export class Donna {
   save(path?: string): string {
     if (!path) {
       mkdirSync(this.saveDir, { recursive: true });
-      path = join(this.saveDir, `${this.name}.donna.json`);
+      path = join(this.saveDir, `${this.name}${SAVE_EXT}`);
     }
 
-    const data: DonnaFile = {
+    const data: NuggetFile = {
       version: 4,
       name: this.name,
       D: this.D,
@@ -445,11 +447,11 @@ export class Donna {
     return path;
   }
 
-  static load(path: string, opts?: { autoSave?: boolean }): Donna {
+  static load(path: string, opts?: { autoSave?: boolean }): Nugget {
     const raw = readFileSync(path, "utf-8");
-    const data: DonnaFile = JSON.parse(raw);
+    const data: NuggetFile = JSON.parse(raw);
 
-    const donna = new Donna({
+    const nugget = new Nugget({
       name: data.name,
       D: data.D,
       banks: data.banks,
@@ -459,11 +461,11 @@ export class Donna {
       maxFacts: data.max_facts ?? 0,
     });
 
-    const cfg = data.config || ({} as Partial<DonnaFile["config"]>);
-    donna._sharpenP = cfg.sharpen_p ?? donna._sharpenP;
-    donna._corvacsA = cfg.corvacs_a ?? donna._corvacsA;
-    donna._tempT = cfg.temp_T ?? donna._tempT;
-    donna._orthIters = cfg.orth_iters ?? donna._orthIters;
+    const cfg = data.config || ({} as Partial<NuggetFile["config"]>);
+    nugget._sharpenP = cfg.sharpen_p ?? nugget._sharpenP;
+    nugget._corvacsA = cfg.corvacs_a ?? nugget._corvacsA;
+    nugget._tempT = cfg.temp_T ?? nugget._tempT;
+    nugget._orthIters = cfg.orth_iters ?? nugget._orthIters;
 
     const migratedFacts = new Map<string, Fact>();
     let didMigrateKeys = false;
@@ -473,7 +475,7 @@ export class Donna {
         : prefixScopedKey(fact.key, fact.value);
       if (scopedKey !== fact.key) {
         didMigrateKeys = true;
-        donna.graph.removeFactNote(fact.key);
+        nugget.graph.removeFactNote(fact.key);
       }
 
       const existing = migratedFacts.get(scopedKey.toLowerCase());
@@ -493,16 +495,16 @@ export class Donna {
       existing.last_hit_session = fact.last_hit_session || existing.last_hit_session;
     }
 
-    donna._facts = [...migratedFacts.values()];
+    nugget._facts = [...migratedFacts.values()];
 
-    donna._syncGraphFromFacts();
-    if (donna._facts.length > 0) {
-      donna._rebuild();
+    nugget._syncGraphFromFacts();
+    if (nugget._facts.length > 0) {
+      nugget._rebuild();
     }
     if (didMigrateKeys) {
-      donna.save(path);
+      nugget.save(path);
     }
-    return donna;
+    return nugget;
   }
 
   private _syncFactNote(fact: Fact, noteMeta?: GraphNoteMetaInput): void {
